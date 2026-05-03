@@ -13,7 +13,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Lahore Boundaries
 const LAHORE_BOUNDS = {
   north: 31.6500,  // North Lahore
   south: 31.3500,  // South Lahore  
@@ -21,7 +20,6 @@ const LAHORE_BOUNDS = {
   west: 74.2500     // West Lahore
 };
 
-// Lahore Center
 const LAHORE_CENTER = { lat: 31.5204, lng: 74.3587 };
 
 const customIcon = new L.DivIcon({
