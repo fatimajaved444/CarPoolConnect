@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 import LocationPicker from "../components/LocationPicker";
-// Added Hash icon for Vehicle Number
 import { Calendar, Users, IndianRupee, Clock, Car, ArrowLeft, AlertCircle, Palette, Info, Hash } from "lucide-react";
 
 const CreateRide = () => {

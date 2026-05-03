@@ -1,6 +1,4 @@
 
-
-// src/pages/PassengerDashboard.jsx
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
@@ -15,8 +13,6 @@ import {
   ArrowRight, X, RefreshCw, ChevronDown, Locate,
   TrendingUp, Fuel, Info, Star, ShieldAlert
 } from "lucide-react";
-
-// ─── Haversine distance (km) ──────────────────────────────────────────────────
 const haversine = (la1, lo1, la2, lo2) => {
   const R = 6371;
   const dLa = (la2 - la1) * Math.PI / 180;
@@ -37,19 +33,15 @@ const calcFare = (dist) => {
   };
 };
 
-// ─── Short address ────────────────────────────────────────────────────────────
 const shortAddr = (addr) => {
   if (!addr) return "Location";
   return addr.split(",")[0];
 };
-
-// ─── Format seconds → MM:SS ───────────────────────────────────────────────────
 const fmtTimer = (s) => {
   if (s <= 0) return "Expired";
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 };
 
-// ─── ETA chip component ───────────────────────────────────────────────────────
 const ETAChip = ({ driverLat, driverLng, pickupLat, pickupLng }) => {
   const dist = haversine(driverLat, driverLng, pickupLat, pickupLng);
   const etaMin = Math.ceil((dist / 30) * 60); // assume avg 30 km/h city speed
@@ -66,7 +58,6 @@ const ETAChip = ({ driverLat, driverLng, pickupLat, pickupLng }) => {
   );
 };
 
-// ─── Fare Info Panel ──────────────────────────────────────────────────────────
 const FareInfo = ({ dist }) => {
   const f = calcFare(dist);
   return (
@@ -84,7 +75,6 @@ const FareInfo = ({ dist }) => {
   );
 };
 
-// ─── Live Location Share Modal ────────────────────────────────────────────────
 const LocationShareModal = ({ onClose }) => {
   const [loc, setLoc] = useState(null);
   const [error, setError] = useState(null);
@@ -164,7 +154,6 @@ const LocationShareModal = ({ onClose }) => {
   );
 };
 
-// ─── Main Component ───────────────────────────────────────────────────────────
 const PassengerDashboard = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -185,7 +174,6 @@ const PassengerDashboard = () => {
   const [searchParams, setSearchParams] = useState({ pickup: null, drop: null });
   const [rideTimers, setRideTimers] = useState({});
 
-  // ── Timer countdown ────────────────────────────────────────────────────────
   useEffect(() => {
     const id = setInterval(() => {
       setRideTimers(prev => {
@@ -197,7 +185,6 @@ const PassengerDashboard = () => {
     return () => clearInterval(id);
   }, []);
 
-  // ── Fetch data ─────────────────────────────────────────────────────────────
   const fetchData = useCallback(async (showLoader = true) => {
     if (showLoader) setLoading(true);
     try {
@@ -209,7 +196,6 @@ const PassengerDashboard = () => {
       const rides = ridesRes.data || [];
       const bookings = bookingsRes.data || [];
 
-      // init timers
       const timers = {};
       rides.forEach(r => {
         if (r.endTime && r.date) {
@@ -224,7 +210,6 @@ const PassengerDashboard = () => {
       setAllRides(rides);
       setMatchedRides(rides);
 
-      // Split bookings by status (not strictly by date, to avoid timezone bugs)
       const upcoming = bookings.filter(b =>
         b.status === "confirmed" && !["completed", "cancelled"].includes(b.ride?.status)
       );
@@ -247,7 +232,6 @@ const PassengerDashboard = () => {
     return () => clearInterval(interval);
   }, [fetchData]);
 
-  // ── Search ─────────────────────────────────────────────────────────────────
   const findMatchingRides = async () => {
     if (!searchParams.pickup || !searchParams.drop) {
       alert("Please select both pickup and drop locations");
@@ -273,7 +257,6 @@ const PassengerDashboard = () => {
   const showAll = () => { setMatchedRides(allRides); setSearched(false); setSearchParams({ pickup: null, drop: null }); };
   const resetSrch = () => { setSearchParams({ pickup: null, drop: null }); setSearched(false); setMatchedRides(allRides); };
 
-  // ── Book ───────────────────────────────────────────────────────────────────
   const initiateBooking = (ride) => {
     setShowPayment({
       rideId: ride._id,
@@ -302,7 +285,6 @@ const PassengerDashboard = () => {
 
 
 
-  // ── Timer color ────────────────────────────────────────────────────────────
   const timerCls = (s) =>
     s <= 60 ? "bg-red-50 text-red-600 border-red-200 animate-pulse" :
       s <= 300 ? "bg-amber-50 text-amber-600 border-amber-200" :
@@ -358,7 +340,7 @@ const PassengerDashboard = () => {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
-        {/* ── Tabs ── */}
+      
         <div className="flex gap-1 bg-slate-200 rounded-xl p-1 mb-6">
           {[
             { id: "search", icon: Search, label: "Find a Ride" },
@@ -379,12 +361,10 @@ const PassengerDashboard = () => {
           ))}
         </div>
 
-        {/* ════════════════ SEARCH TAB ════════════════ */}
         {activeTab === "search" && (
           <div className="space-y-5">
 
 
-            {/* Map pickers */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
               <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
                 <Navigation size={15} className="text-indigo-500" /> Select Your Journey
@@ -422,7 +402,6 @@ const PassengerDashboard = () => {
               </div>
             </div>
 
-            {/* Route summary */}
             {searchParams.pickup && searchParams.drop && (
               <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-indigo-50 border border-indigo-100 text-sm">
                 <Zap size={14} className="text-indigo-500 flex-shrink-0" />
@@ -432,7 +411,7 @@ const PassengerDashboard = () => {
               </div>
             )}
 
-            {/* Rides list */}
+          
             {matchedRides.length === 0 ? (
               <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
                 <MapPin size={40} className="text-slate-200 mx-auto mb-3" />
@@ -550,7 +529,7 @@ const PassengerDashboard = () => {
           </div>
         )}
 
-        {/* ════════════════ MY BOOKINGS TAB ════════════════ */}
+       
         {activeTab === "bookings" && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -692,7 +671,6 @@ const PassengerDashboard = () => {
           </div>
         )}
 
-        {/* ════════════════ HISTORY TAB ════════════════ */}
         {activeTab === "history" && (
           <div className="space-y-4">
             <h2 className="text-base font-bold text-slate-800">Ride History</h2>
@@ -734,7 +712,6 @@ const PassengerDashboard = () => {
         )}
       </main>
 
-      {/* ── Chat Modal ── */}
       {showChat && (
         <ChatModal
           rideId={showChat.rideId}
@@ -746,10 +723,9 @@ const PassengerDashboard = () => {
         />
       )}
 
-      {/* ── Location Share Modal ── */}
+    
       {showLocShare && <LocationShareModal onClose={() => setShowLocShare(false)} />}
 
-      {/* ── Payment Modal ── */}
       <PaymentModal
         isOpen={!!showPayment}
         onClose={() => setShowPayment(null)}

@@ -1,4 +1,3 @@
-// src/pages/SearchRide.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
@@ -17,7 +16,7 @@ const SearchRide = () => {
     date: ""
   });
   const [searched, setSearched] = useState(false);
-  const [matchType, setMatchType] = useState('all'); // 'all', 'exact', 'nearby'
+  const [matchType, setMatchType] = useState('all'); 
 
   useEffect(() => {
     fetchAllRides();
