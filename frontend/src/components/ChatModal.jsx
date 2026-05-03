@@ -1,4 +1,4 @@
-// src/components/ChatModal.jsx
+
 import { useEffect, useState, useRef } from "react";
 import API from "../services/api";
 import { X, Send, MessageCircle } from "lucide-react";
@@ -11,10 +11,8 @@ const ChatModal = ({ rideId, rideTitle, currentUserId, receiverId, receiverName,
   const messagesEndRef = useRef(null);
   const pollingRef = useRef(null);
 
-  // Chat header name (the person you're chatting with)
   const chatPartnerName = receiverName || "Driver";
 
-  // Load messages function
   const loadMessages = async () => {
     try {
       const res = await API.get(`/chats/messages/${rideId}`);
@@ -27,11 +25,10 @@ const ChatModal = ({ rideId, rideTitle, currentUserId, receiverId, receiverName,
     }
   };
 
-  // Initial load and polling
   useEffect(() => {
     loadMessages();
     
-    // Poll every 2 seconds for new messages
+   
     pollingRef.current = setInterval(loadMessages, 2000);
     
     return () => {
@@ -39,14 +36,13 @@ const ChatModal = ({ rideId, rideTitle, currentUserId, receiverId, receiverName,
     };
   }, [rideId]);
 
-  // Scroll to bottom when messages change
+  
   useEffect(() => {
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   }, [messages]);
 
-  // Send message function
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
     if (!receiverId) {

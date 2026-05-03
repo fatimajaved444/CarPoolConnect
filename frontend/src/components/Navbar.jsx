@@ -1,4 +1,3 @@
-// src/components/Navbar.jsx
 import { Link, useNavigate } from "react-router-dom";
 import { LayoutDashboard, PlusCircle, Search, Calendar, User, LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
