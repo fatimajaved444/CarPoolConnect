@@ -1,11 +1,9 @@
-// src/components/LocationPicker.jsx
 import { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { MapPin, Navigation, X, Search, Loader } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
-// Fix for default marker icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -13,7 +11,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Lahore Boundaries
 const LAHORE_BOUNDS = {
   north: 31.6500,  // North Lahore
   south: 31.3500,  // South Lahore  
@@ -21,7 +18,6 @@ const LAHORE_BOUNDS = {
   west: 74.2500     // West Lahore
 };
 
-// Lahore Center
 const LAHORE_CENTER = { lat: 31.5204, lng: 74.3587 };
 
 const customIcon = new L.DivIcon({
@@ -221,7 +217,7 @@ const LocationPicker = ({ onLocationSelect, title, initialLocation }) => {
         )}
       </div>
 
-      {/* Leaflet Map - Restricted to Lahore */}
+    
       <MapContainer
         key={`map-${mapCenter.lat}-${mapCenter.lng}`}
         center={[mapCenter.lat, mapCenter.lng]}
@@ -267,7 +263,7 @@ const LocationPicker = ({ onLocationSelect, title, initialLocation }) => {
         )}
       </MapContainer>
 
-      {/* Lahore Info */}
+    
       <div className="bg-gray-50 p-2 rounded-lg text-center">
         <p className="text-xs text-gray-500 flex items-center justify-center gap-1">
           <Navigation className="h-3 w-3" />
@@ -275,7 +271,6 @@ const LocationPicker = ({ onLocationSelect, title, initialLocation }) => {
         </p>
       </div>
 
-      {/* Selected Location Info */}
       {selectedLocation && (
         <div className="bg-indigo-50 p-3 rounded-lg text-sm border border-indigo-200">
           <p className="font-medium text-indigo-800 flex items-center gap-1">
