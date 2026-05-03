@@ -628,12 +628,10 @@ const PassengerDashboard = () => {
                         </div>
                       )}
 
-                      {/* Fare breakdown */}
                       {dist > 0 && (
                         <FareInfo dist={dist} />
                       )}
 
-                      {/* Actions */}
                       {ride?.status === "in_progress" && (
                         <div className="mt-4 mb-2">
                           <button
