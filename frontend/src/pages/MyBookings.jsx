@@ -1,10 +1,8 @@
-// src/pages/MyBookings.jsx
 import { useEffect, useState } from "react";
 import API from "../services/api";
 import Navbar from "../components/Navbar";
 import { Calendar, Users, IndianRupee, X } from "lucide-react";
 
-// Test karo — getMyBookings mein temporarily yeh add karo
 const bookings = await Booking.find({ user: req.user.id });
 console.log("All bookings for user:", bookings);
 

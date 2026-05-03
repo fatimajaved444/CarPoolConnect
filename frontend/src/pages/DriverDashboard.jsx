@@ -1,4 +1,3 @@
-// src/pages/DriverDashboard.jsx
 import { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import API from "../services/api";
@@ -12,7 +11,6 @@ import {
   Info
 } from "lucide-react";
 
-// ─── Haversine Distance Calculator ────────────────────────────────────────────
 const haversine = (la1, lo1, la2, lo2) => {
   const R = 6371;
   const dLa = (la2 - la1) * Math.PI / 180;
@@ -20,7 +18,7 @@ const haversine = (la1, lo1, la2, lo2) => {
   const a = Math.sin(dLa / 2) ** 2 +
     Math.cos(la1 * Math.PI / 180) * Math.cos(la2 * Math.PI / 180) * Math.sin(dLo / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}; // ← THIS BRACE WAS MISSING!
+}; 
 
 const calcFare = (dist) => {
   const fare = (dist * 35) / 2;
@@ -33,7 +31,6 @@ const calcFare = (dist) => {
   };
 };
 
-// ─── Short Address Helper ──────────────────────────────────────────────────────
 const shortAddr = (addr) => {
   if (!addr) return "Location";
   const landmarks = ["Devsinc", "DHA", "Gulberg", "Johar Town", "Model Town", "Mall Road", "Airport", "Liberty", "Nishat Colony", "Cantt View", "Railway Station"];
@@ -41,7 +38,6 @@ const shortAddr = (addr) => {
   return addr.split(",")[0];
 };
 
-// ─── Duration Formatter ────────────────────────────────────────────────────────
 const formatDuration = (start, end) => {
   if (!start || !end) return null;
   try {
@@ -54,7 +50,6 @@ const formatDuration = (start, end) => {
   } catch { return null; }
 };
 
-// ─── Avatar Color Palette ──────────────────────────────────────────────────────
 const AVATAR_COLORS = [
   { bg: "#EDE9FE", fg: "#6D28D9" }, { bg: "#DBEAFE", fg: "#1D4ED8" },
   { bg: "#D1FAE5", fg: "#065F46" }, { bg: "#FEF3C7", fg: "#92400E" },
@@ -63,7 +58,6 @@ const AVATAR_COLORS = [
 ];
 const getAvatarColor = (name) => AVATAR_COLORS[(name?.length || 0) % AVATAR_COLORS.length];
 
-// ─── Fare Suggestion Panel ────────────────────────────────────────────────────
 const FareSuggestionPanel = ({ ride, onApply }) => {
   const distance = ride.pickup && ride.drop
     ? haversine(ride.pickup.lat, ride.pickup.lng, ride.drop.lat, ride.drop.lng)
@@ -91,7 +85,6 @@ const FareSuggestionPanel = ({ ride, onApply }) => {
   );
 };
 
-// ─── Edit Ride Form ────────────────────────────────────────────────────────────
 const EditRideForm = ({ ride, onSave, onCancel }) => {
   const [form, setForm] = useState({
     pickupName: ride.pickup.name,
@@ -139,7 +132,6 @@ const EditRideForm = ({ ride, onSave, onCancel }) => {
   );
 };
 
-// ─── Main Driver Dashboard Component ───────────────────────────────────────────
 const DriverDashboard = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -162,8 +154,6 @@ const DriverDashboard = () => {
 
       const today = new Date().toISOString().split("T")[0];
 
-      // IMPORTANT: Show ALL active rides regardless of seats
-      // Only filter by date and status, NOT by seats
       const active = allRides.filter(r => r.date >= today && ["active", "assigned", "in_progress"].includes(r.status));
       const past = allRides.filter(r => r.date < today || ["completed", "cancelled"].includes(r.status));
 
@@ -193,7 +183,7 @@ const DriverDashboard = () => {
 
   useEffect(() => {
     fetchData(true);
-    // Auto refresh every 10 seconds
+   
     const interval = setInterval(() => fetchData(false), 10000);
     return () => clearInterval(interval);
   }, [fetchData]);
