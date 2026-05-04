@@ -20,14 +20,43 @@ const haversine = (la1, lo1, la2, lo2) => {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }; 
 
-const calcFare = (dist) => {
-  const fare = (dist * 35) / 2;
+
+const calcFare = (dist, rideTime = null) => {
+  let baseRate = 35; // Standard rate
+  let multiplier = 1.0;
+  let peakReason = "Standard Rate";
+
+  let hour;
+  if (rideTime && typeof rideTime === 'string' && rideTime.includes(":")) {
+    hour = parseInt(rideTime.split(":")[0]);
+  } else {
+    hour = new Date().getHours();
+  }
+
+  if (hour >= 13 && hour < 14) {
+    multiplier = 1.30; // 30% extra
+    peakReason = "Afternoon Rush (30% Peak)";
+  }
+  
+  else if (hour >= 18 && hour < 19) {
+    multiplier = 1.30; // 30% extra
+    peakReason = "Evening Peak (30% Peak)";
+  }
+ 
+  else if (hour >= 1 && hour < 6) {
+    multiplier = 1.45;
+    peakReason = "Late Night Surcharge";
+  }
+
+  const distanceBasedFare = dist * baseRate * multiplier;
+  const finalFare = distanceBasedFare / 2; // 50-50 share
+
   return {
-    dist: dist.toFixed(1),
-    fuelCost: Math.ceil(fare),
-    totalCost: Math.ceil(fare),
-    perSeat: Math.ceil(fare),
-    driverEarn: Math.ceil(fare),
+    dist: dist ? dist.toFixed(1) : "0.0",
+    perSeat: Math.ceil(finalFare),
+    multiplier: multiplier,
+    peakReason: peakReason,
+    isPeak: multiplier > 1.0
   };
 };
 
@@ -58,73 +87,133 @@ const AVATAR_COLORS = [
 ];
 const getAvatarColor = (name) => AVATAR_COLORS[(name?.length || 0) % AVATAR_COLORS.length];
 
+
 const FareSuggestionPanel = ({ ride, onApply }) => {
   const distance = ride.pickup && ride.drop
     ? haversine(ride.pickup.lat, ride.pickup.lng, ride.drop.lat, ride.drop.lng)
     : 0;
-  const fare = calcFare(distance);
+    
+  const fare = calcFare(distance, ride.startTime);
 
+  // Dashbaord ki theme (Indigo) ke hissab se colors set kiye hain
   return (
-    <div className="rounded-xl border border-indigo-100 bg-gradient-to-r from-indigo-50 to-blue-50 p-3 mb-3">
-      <p className="text-xs font-semibold text-indigo-700 uppercase tracking-wide mb-2 flex items-center gap-1">
-        <Fuel size={11} /> Suggested Fare
-      </p>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs mb-2">
-        <span className="text-slate-500">Distance</span>
-        <span className="font-semibold text-slate-800 text-right">{fare.dist} km</span>
-        <span className="text-slate-500">Total Fare</span>
-        <span className="font-semibold text-slate-800 text-right">Rs {fare.perSeat}</span>
+    <div className={`rounded-xl border p-4 mb-4 transition-all duration-300 ${
+      fare.isPeak 
+        ? 'border-indigo-200 bg-indigo-50/50 shadow-sm' 
+        : 'border-slate-100 bg-slate-50/50'
+    }`}>
+      <div className="flex justify-between items-center mb-3">
+        <p className={`text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 ${
+          fare.isPeak ? 'text-indigo-700' : 'text-slate-500'
+        }`}>
+          <div className={`w-1.5 h-1.5 rounded-full ${fare.isPeak ? 'bg-indigo-500 animate-pulse' : 'bg-slate-400'}`}></div>
+          Suggested Fare
+        </p>
+        
+        {fare.isPeak && (
+          <span className="bg-indigo-600 text-white text-[9px] px-2 py-0.5 rounded font-bold uppercase">
+            {fare.peakReason}
+          </span>
+        )}
       </div>
+      
+      <div className="space-y-2 mb-4">
+        <div className="flex justify-between items-center text-[11px]">
+          <span className="text-slate-500 font-medium">Total Distance</span>
+          <span className="font-bold text-slate-700">{fare.dist} KM</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-[11px] font-medium text-slate-500">Your Share (50%)</span>
+          <span className={`text-base font-black ${fare.isPeak ? 'text-indigo-700' : 'text-slate-800'}`}>
+            Rs {fare.perSeat}
+          </span>
+        </div>
+      </div>
+      
       <button
         onClick={() => onApply(fare.perSeat)}
-        className="w-full py-1.5 text-xs font-semibold rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors"
+        className={`w-full py-2.5 text-[11px] font-bold rounded-lg text-white transition-all active:scale-[0.98] ${
+          fare.isPeak 
+            ? 'bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-100' 
+            : 'bg-slate-700 hover:bg-slate-800 shadow-sm'
+        }`}
       >
-        Apply Rs {fare.perSeat}
+        {fare.isPeak ? `Apply Peak Rate: Rs ${fare.perSeat}` : `Apply Suggested Fare`}
       </button>
+      
+      {fare.isPeak && (
+        <p className="text-[10px] text-indigo-500/80 mt-2 flex items-center gap-1 font-medium">
+          <span className="inline-block w-1 h-1 bg-indigo-400 rounded-full"></span>
+          High demand pricing applied for this time slot
+        </p>
+      )}
     </div>
   );
 };
-
 const EditRideForm = ({ ride, onSave, onCancel }) => {
   const [form, setForm] = useState({
-    pickupName: ride.pickup.name,
-    dropName: ride.drop.name,
-    seats: ride.seats,
-    price: ride.price,
-    date: ride.date,
+    pickupName: ride.pickup?.name || "",
+    dropName: ride.drop?.name || "",
+    seats: ride.seats || 0,
+    price: ride.price || 0,
+    date: ride.date || "",
     startTime: ride.startTime || "",
     endTime: ride.endTime || "",
   });
 
+  // Input fields configuration for cleaner mapping
+  const fields = [
+    { label: "Pickup Location", key: "pickupName", type: "text", icon: "📍" },
+    { label: "Drop Location", key: "dropName", type: "text", icon: "🏁" },
+    { label: "Available Seats", key: "seats", type: "number", icon: "💺" },
+    { label: "Price (Rs)", key: "price", type: "number", icon: "💰" },
+    { label: "Travel Date", key: "date", type: "date", icon: "📅" },
+    { label: "Start Time", key: "startTime", type: "time", icon: "🕒" },
+    { label: "End Time", key: "endTime", type: "time", icon: "⏳" },
+  ];
+
   return (
-    <div className="p-4 bg-slate-50 border-t border-slate-200">
-      <p className="text-sm font-semibold text-slate-800 mb-3">✏️ Edit Ride Details</p>
-      <FareSuggestionPanel ride={{ ...ride, seats: form.seats }} onApply={(price) => setForm(f => ({ ...f, price }))} />
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-3">
-        {[
-          ["text", "pickupName", "Pickup Location"],
-          ["text", "dropName", "Drop Location"],
-          ["number", "seats", "Available Seats"],
-          ["number", "price", "Price (Rs)"],
-          ["date", "date", "Date"],
-          ["time", "startTime", "Start Time"],
-          ["time", "endTime", "End Time"],
-        ].map(([type, key, placeholder]) => (
-          <input
-            key={key}
-            type={type}
-            value={form[key]}
-            placeholder={placeholder}
-            onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-          />
+    <div className="p-5 bg-white border-t-2 border-indigo-100 rounded-b-2xl shadow-inner">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-1 h-5 bg-indigo-600 rounded-full"></div>
+        <p className="text-sm font-bold text-slate-800">Edit Ride Details</p>
+      </div>
+      
+      {/* Fare Suggestion - Updates in real-time when startTime changes */}
+      <FareSuggestionPanel 
+        ride={{ ...ride, startTime: form.startTime }} 
+        onApply={(suggestedPrice) => setForm(f => ({ ...f, price: suggestedPrice }))} 
+      />
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+        {fields.map((field) => (
+          <div key={field.key} className="flex flex-col gap-1">
+            <label className="text-[11px] font-bold text-indigo-600 uppercase ml-1">
+              {field.label}
+            </label>
+            <div className="relative">
+              <input
+                type={field.type}
+                value={form[field.key]}
+                onChange={e => setForm(f => ({ ...f, [field.key]: e.target.value }))}
+                className="w-full px-3 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+              />
+            </div>
+          </div>
         ))}
       </div>
-      <div className="flex gap-2">
-        <button onClick={() => onSave(ride._id, form)} className="px-5 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-semibold transition-colors">
+
+      <div className="flex items-center gap-3 pt-2">
+        <button 
+          onClick={() => onSave(ride._id, form)} 
+          className="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-lg shadow-indigo-200 transition-all active:scale-95"
+        >
           Save Changes
         </button>
-        <button onClick={onCancel} className="px-5 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-medium transition-colors">
+        <button 
+          onClick={onCancel} 
+          className="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-semibold transition-all"
+        >
           Cancel
         </button>
       </div>
