@@ -184,53 +184,45 @@ const PassengerDashboard = () => {
     }, 1000);
     return () => clearInterval(id);
   }, []);
+const fetchData = useCallback(async (showLoader = true) => {
+  if (showLoader) setLoading(true);
+  try {
+    const [ridesRes, bookingsRes] = await Promise.all([
+      API.get("/rides/available"),
+      API.get("/bookings/my"),
+    ]);
 
-  const fetchData = useCallback(async (showLoader = true) => {
-    if (showLoader) setLoading(true);
-    try {
-      const [ridesRes, bookingsRes] = await Promise.all([
-        API.get("/rides/available"),
-        API.get("/bookings/my"),
-      ]);
+    const rides = ridesRes.data || [];
+    const bookings = bookingsRes.data || [];
 
-      const rides = ridesRes.data || [];
-      const bookings = bookingsRes.data || [];
+    setAllRides(rides);
 
-      const timers = {};
-      rides.forEach(r => {
-        if (r.endTime && r.date) {
-          const [h, m] = r.endTime.split(":").map(Number);
-          const end = new Date(r.date);
-          end.setHours(h, m, 0);
-          const secs = Math.floor((end - Date.now()) / 1000);
-          if (secs > 0) timers[r._id] = secs;
-        }
-      });
-      setRideTimers(timers);
-      setAllRides(rides);
+   
+    if (!searched) {
       setMatchedRides(rides);
-
-      const upcoming = bookings.filter(b =>
-        b.status === "confirmed" && !["completed", "cancelled"].includes(b.ride?.status)
-      );
-      const history = bookings.filter(b =>
-        b.status === "cancelled" || ["completed", "cancelled"].includes(b.ride?.status)
-      );
-      setMyBookings(upcoming);
-      setHistoryBookings(history);
-    } catch (err) {
-      console.error("fetchData error:", err);
-    } finally {
-      setLoading(false);
-      setInitialLoad(false);
     }
-  }, []);
+
+    const upcoming = bookings.filter(b => 
+      b.status === "confirmed" && !["completed", "cancelled"].includes(b.ride?.status)
+    );
+    const history = bookings.filter(b => 
+      b.status === "cancelled" || ["completed", "cancelled"].includes(b.ride?.status)
+    );
+    setMyBookings(upcoming);
+    setHistoryBookings(history);
+  } catch (err) {
+    console.error("fetchData error:", err);
+  } finally {
+    setLoading(false);
+    setInitialLoad(false);
+  }
+}, [searched]); 
 
   useEffect(() => {
-    fetchData(true);
-    const interval = setInterval(() => fetchData(false), 10000);
-    return () => clearInterval(interval);
-  }, [fetchData]);
+  fetchData(initialLoad); 
+  const interval = setInterval(() => fetchData(false), 10000); 
+  return () => clearInterval(interval);
+}, [fetchData, initialLoad]);
 
   const findMatchingRides = async () => {
     if (!searchParams.pickup || !searchParams.drop) {
