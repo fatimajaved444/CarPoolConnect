@@ -7,11 +7,16 @@ const RoleSelector = () => {
   const [selectedRole, setSelectedRole] = useState(null);
 
   const handleContinue = () => {
-    if (selectedRole) {
-      localStorage.setItem("userRole", selectedRole);
+  if (selectedRole) {
+    localStorage.setItem("userRole", selectedRole);
+    
+    if (selectedRole === "driver") {
+      navigate("/verify-cnic");
+    } else {
       navigate("/dashboard");
     }
-  };
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4">
