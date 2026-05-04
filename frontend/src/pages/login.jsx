@@ -9,20 +9,29 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const res = await API.post("/auth/login", form);
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  try {
+    const res = await API.post("/auth/login", form);
+   
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("user", JSON.stringify(res.data.user));
+
+    const user = res.data.user;
+    
+    if (user.isVerified) {
+      navigate("/dashboard");
+    } else {
       navigate("/role-selector");
-    } catch (err) {
-      alert(err.response?.data?.error || "Login failed");
-    } finally {
-      setLoading(false);
     }
-  };
+
+  } catch (err) {
+    alert(err.response?.data?.error || "Login failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
