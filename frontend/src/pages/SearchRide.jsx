@@ -20,7 +20,7 @@ const SearchRide = () => {
 
   useEffect(() => {
     fetchAllRides();
-  }, []);
+  }, [fetchAllRides]);
 
   const fetchAllRides = async () => {
     setLoading(true);

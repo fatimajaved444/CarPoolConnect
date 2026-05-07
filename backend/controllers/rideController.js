@@ -48,7 +48,7 @@ exports.getAvailableRides = async (req, res) => {
     const rides = await Ride.find({
       driver: { $ne: req.user.id },
       seats:  { $gt: 0 },
-      status: "active"          // ← only unassigned rides visible to passengers
+      status: "active"          
     })
       .populate("driver", "name email phone")
       .sort({ date: 1 });

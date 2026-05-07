@@ -82,7 +82,6 @@ exports.bookRide = async (req, res) => {
 
 exports.getMyBookings = async (req, res) => {
   try {
-    // Pehle bina status filter ke try karo
     const bookings = await Booking.find({ user: req.user.id })
       .populate({
         path: "ride",
@@ -93,7 +92,7 @@ exports.getMyBookings = async (req, res) => {
       })
       .sort({ createdAt: -1 });
 
-    console.log("Bookings found:", bookings.length); // debug ke liye
+    console.log("Bookings found:", bookings.length); 
     res.json(bookings);
   } catch (err) {
     console.error(err);

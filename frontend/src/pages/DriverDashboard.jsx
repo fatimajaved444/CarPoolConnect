@@ -7,8 +7,7 @@ import {
   MapPin, Clock, CheckCircle, XCircle,
   LogOut, History, Activity, AlertCircle,
   Wallet, Timer, Phone, Mail, ChevronDown, ChevronUp,
-  ArrowRight, TrendingUp, MessageCircle, Fuel, RefreshCw,
-  Info
+  ArrowRight, TrendingUp, MessageCircle, Fuel, RefreshCw
 } from "lucide-react";
 
 const haversine = (la1, lo1, la2, lo2) => {
@@ -20,13 +19,13 @@ const haversine = (la1, lo1, la2, lo2) => {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }; 
 
-const getCurrentTime = (offsetMinutes = 0) => {
-  const now = new Date();
-  if (offsetMinutes > 0) {
-    now.setMinutes(now.getMinutes() + offsetMinutes);
-  }
-  return now.toTimeString().slice(0, 5); // Returns "HH:mm"
-};
+// const getCurrentTime = (offsetMinutes = 0) => {
+//   const now = new Date();
+//   if (offsetMinutes > 0) {
+//     now.setMinutes(now.getMinutes() + offsetMinutes);
+//   }
+//   return now.toTimeString().slice(0, 5); // Returns "HH:mm"
+// };
 
 const calcFare = (dist, rideTime = null) => {
   let baseRate = 35; // Standard rate

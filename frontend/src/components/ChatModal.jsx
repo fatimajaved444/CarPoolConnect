@@ -26,6 +26,7 @@ const ChatModal = ({ rideId, rideTitle, currentUserId, receiverId, receiverName,
   };
 
   useEffect(() => {
+    
     loadMessages();
     
    
